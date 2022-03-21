@@ -6,124 +6,112 @@ class Connect4:
         self.empty_field = '  '
         self.board = [ [ self.empty_field for _ in range( self.numberOfColumns)] for _ in range(self.numberOfLines) ]
 
-    def displayBoard(self):
+    def visualize_board(self):
         for i, line in enumerate(self.board):
             # Printing the line separators
-            print("_" * self.numberOfColumns * 4)
+            print("-" * self.numberOfColumns * 4)
             # Printing the line
             print(*line, sep=' |')
 
-    def isAvailable(self, line, column):
+    def is_available(self, line, column):
         if line[column] == self.empty_field:
             return True
         return False
 
     def player_choice(self, current_player):
-        choice = int(input("Please " + current_player + " select an empty space between 0 and 6 : "))
+        choice = int(input("please " + current_player + " select an empty field between 0 and 6 : "))
         while self.board[0][choice] != self.empty_field:
-            choice = int(input("This column is full. Please choose between 0 and 6 : "))
+            choice = int(input("column already full: Please re-choose between 0 and 6 : "))
         return choice
 
     def player_input(self):
-        player1 = input("Please pick a marker 'X' or 'O' ")
+        player_1 = input("Pick a color 'R' or 'Y' ")
         while True:
-            if player1.upper() == 'X':
-                player2='O'
-                print("You've choosen " + player1 + ". Player 2 will be " + player2)
-                return player1.upper(),player2
-            elif player1.upper() == 'O':
-                player2='X'
-                print("You've choosen " + player1 + ". Player 2 will be " + player2)
-                return player1.upper(),player2
+            if player_1.upper() == 'R':
+                player_2='Y'
+                print("you have choosen " + player_1 + ". Player 2 will be " + player_2)
+                return player_1.upper(),player_2
+            elif player_1.upper() == 'Y':
+                player_1='R'
+                print("you have choosen " + player_1 + ". Player 2 will be " + player_2)
+                return player_1.upper(),player_2
             else:
-                player1 = input("Please pick a marker 'X' or 'O' ")
+                player_1 = input("please pick a color 'R' or 'Y' ")
 
-    def checkLines(self, marker, board=None):
+    def check_lines(self, marker, board=None):
         if board is None:
             board=self.board
-        # Checkin lines
         for line in board:
             for i in range(0,len(line)):
                 if i < len(line) - 3:
                     if line[i] == line[i+1] == line[i+2] == line[i+3] == " " + marker:
                         return True
 
-    def checkDiags(self, marker):
-        diagBoard = []
+    def check_diagonals(self, marker):
+        diagonals = []
         for i, line in enumerate(self.board):
             for idx, item in enumerate(line):
-                # Find of there is some marker
                 if item == ' ' + marker:
-                    diagBoard.append(int(str(i)+str(idx)))
+                    diagonals.append(int(str(i)+str(idx)))
 
-        for item in diagBoard:
-            if int(item) + 11 in diagBoard and int(item) + 22 in diagBoard and int(item) + 33 in diagBoard:
+        for item in diagonals:
+            if int(item) + 11 in diagonals and int(item) + 22 in diagonals and int(item) + 33 in diagonals:
                 return True
 
-        for item in reversed(diagBoard):
-            if int(item) - 9 in diagBoard and int(item) - 18 in diagBoard and int(item) - 27 in diagBoard:
+        for item in reversed(diagonals):
+            if int(item) - 9 in diagonals and int(item) - 18 in diagonals and int(item) - 27 in diagonals:
                 return True
 
-    def generateReversedBoard(self):
-        reversedBoard = []
+    def create_reversed_board(self):
+        reversed_board = []
         for line in self.board:
             for index, item in enumerate(line):
-                if len(reversedBoard) > index:
-                    reversedBoard[index].append(item)
+                if len(reversed_board) > index:
+                    reversed_board[index].append(item)
                 else:
-                    reversedBoard.append([])
-                    reversedBoard[index].append(item)
-        return reversedBoard
+                    reversed_board.append([])
+                    reversed_board[index].append(item)
+        return reversed_board
 
     def play(self, playercolumn, marker):
         for item in reversed(self.board):
-            if self.isAvailable(item, playercolumn):
+            if self.is_available(item, playercolumn):
                 item[playercolumn] = " " + marker
                 return True
         return False
 
 c = Connect4()
 
-# game loop init
 game = True
 while game:
-    # Choose your marker
     player_marker_1, player_marker_2 = c.player_input()
-    # Display the board
-    c.displayBoard()
-    # Second while loop init
-    win = False
-    i = 1
-    while not win:
-        # Start Playing
-        if i % 2 == 0:
+    c.visualize_board()
+    finished = False
+    number_of_rounds = 1
+    while not finished:
+        if number_of_rounds % 2 == 0:
             currentPlayer = "Reggie"
             marker = player_marker_1
         else:
             currentPlayer = "Johny"
             marker = player_marker_2
-        # Player to choose where to put the mark
         position = c.player_choice(currentPlayer)
         if not c.play(position, marker):
             print(f"Column {position} full")
 
-        # Generate the reversed board
-        reversedBoard = c.generateReversedBoard()
-        # Check if won
-        if c.checkLines(marker) or c.checkLines(marker, reversedBoard) or c.checkDiags(marker):
-            # update the win to exit the second while loop
-            win = True
-            c.displayBoard()
+        reversed_board = c.create_reversed_board()
+        if c.check_lines(marker) or c.check_lines(marker, reversed_board) or c.check_diagonals(marker):
+            finished = True
+            c.visualize_board()
             print(f"Game won by {currentPlayer}")
-            # Ask for replay. 
-            # If no, change the first loop game = True to False
-            # If yes, reset our class with fresh new datas
-            replay = input("Do you want to play again (Y/N) ? ")
+            
+            #start new game
+            replay = input("play again (Y/N) ? ")
             if replay.lower() == 'n':
                 game = False
-                print("Game ended !")
+                print("game ended!!")
             else:
                 c = Connect4()
             break
-        c.displayBoard()
-        i += 1
+        c.visualize_board()
+        number_of_rounds += 1
